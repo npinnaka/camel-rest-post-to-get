@@ -27,12 +27,21 @@ public class FromPostToGet extends RouteBuilder {
                 .to("http://localhost:9000/employees?bridgeEndpoint=true")
                 .unmarshal().json(JsonLibrary.Jackson, Employee.class)
                 .log("${body}")
+                .choice().when(exchange -> {
+                    Employee emp = exchange.getMessage().getBody(Employee.class);
+                    if (emp.getEmpId() % 2 == 0)
+                        return true;
+                    else
+                        return false;
+                })
                 .process(exchange -> {
                     Employee emp = exchange.getMessage().getBody(Employee.class);
                     exchange.getMessage().setBody("");
                     exchange.getMessage().setHeader("id", constant(emp.getEmpId()));
                 })
-                .to("direct:getEmployee");
+                .to("direct:getEmployee")
+                .otherwise()
+                .to("direct:getEmployees");
 
         from("direct:getEmployees")
                 .setHeader(Exchange.HTTP_METHOD, constant("GET"))
