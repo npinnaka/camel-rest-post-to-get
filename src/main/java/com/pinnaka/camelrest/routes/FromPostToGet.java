@@ -29,10 +29,8 @@ public class FromPostToGet extends RouteBuilder {
                 .log("${body}")
                 .choice().when(exchange -> {
                     Employee emp = exchange.getMessage().getBody(Employee.class);
-                    if (emp.getEmpId() % 2 == 0)
-                        return true;
-                    else
-                        return false;
+                    // Change the To route based on the Employee ID
+                    return emp.getEmpId() % 2 == 0;
                 })
                 .process(exchange -> {
                     Employee emp = exchange.getMessage().getBody(Employee.class);
